@@ -129,32 +129,42 @@ DECLARE
     v_e_socio BOOLEAN;
     v_diferenca_dias INT;
     v_meses_perfil INT;
+    v_existe_conflito BOOLEAN;
 BEGIN
-    -- Verificar se é sócio
+    SELECT EXISTS (
+        SELECT 1 
+        FROM Reserva
+        WHERE ID_Court = NEW.ID_Court
+          AND ID_Reserva != NEW.ID_Reserva
+          AND (
+            NEW.DataHora_Inicio < (DataHora_Inicio + make_interval(mins => Duracao_Minutos))
+            AND
+            (NEW.DataHora_Inicio + make_interval(mins => NEW.Duracao_Minutos)) > DataHora_Inicio
+          )
+    ) INTO v_existe_conflito;
+
+    IF v_existe_conflito THEN
+        RAISE EXCEPTION 'Erro: O Court % já se encontra ocupado neste horário.', NEW.ID_Court;
+    END IF;
+
     SELECT EXISTS(SELECT 1 FROM Socio WHERE ID_Utilizador = NEW.ID_Utilizador) INTO v_e_socio;
 
-    -- Calcular antecedência da reserva em dias
     v_diferenca_dias := DATE_PART('day', NEW.DataHora_Inicio - CURRENT_TIMESTAMP);
 
     IF v_e_socio THEN
-        -- Regra Sócio: Antecedência máxima de 7 dias
         IF v_diferenca_dias > 7 THEN 
             RAISE EXCEPTION 'Erro: Sócios só podem reservar com 7 dias de antecedência.';
         END IF;
     ELSE
-        -- Lógica para NÃO SÓCIOS
         SELECT Data_Criacao_Perfil INTO v_data_criacao FROM NaoSocio WHERE ID_Utilizador = NEW.ID_Utilizador;
         
-        -- Calcular idade do perfil em meses
         v_meses_perfil := (DATE_PART('year', CURRENT_DATE) - DATE_PART('year', v_data_criacao)) * 12 +
                           (DATE_PART('month', CURRENT_DATE) - DATE_PART('month', v_data_criacao));
 
-        -- Regra: Perfil expira após 3 meses
         IF v_meses_perfil >= 3 THEN
              RAISE EXCEPTION 'Erro: Perfil de Não Sócio expirado (mais de 3 meses).';
         END IF;
 
-        -- Regra Não Sócio: Antecedência máxima de 1 dia
         IF v_diferenca_dias > 1 THEN 
             RAISE EXCEPTION 'Erro: Não Sócios só podem reservar com 1 dia de antecedência.';
         END IF;
@@ -174,7 +184,6 @@ FOR EACH ROW EXECUTE FUNCTION fn_verificar_regras_reserva();
  * Implementa:
  * - Regra de Cobrança: O valor cobrado ao utilizador é sempre 50% do prejuízo total.
  */
-
 CREATE OR REPLACE FUNCTION fn_calculo_dano()
 RETURNS TRIGGER AS $$
 BEGIN

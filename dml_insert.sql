@@ -191,3 +191,10 @@ VALUES
 INSERT INTO Aloca_Torneio (ID_Torneio, ID_Court) VALUES 
     (1, 1), (1, 2), (1, 11), (1, 12),
     (2, 15), (2, 16);
+
+
+-- Caso para erro atualização
+/*
+INSERT INTO Reserva (ID_Reserva, DataHora_Inicio, Duracao_Minutos, Requer_Iluminacao, ID_Court, ID_Tarifario, ID_Utilizador) 
+VALUES (999, NOW() + INTERVAL '2 hours 30 minutes', 60, FALSE, 1, 1, 10);
+/*
