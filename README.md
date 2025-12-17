@@ -1,4 +1,4 @@
-# Sistema de Gestão de Clube de Ténis e Padel 🎾
+# Sistema de Gestão de Clube de Ténis e Padel
 
 **Universidade do Algarve - FCT**
 **Unidade Curricular:** Bases de Dados (2025/26)
@@ -21,7 +21,7 @@ Os scripts SQL estão organizados da seguinte forma:
 | `dml_insert.sql` | Povoamento com dados de teste e histórico. |
 | `queries.sql` | Conjunto de queries para análise de dados. |
 
-## 🚀 Como Executar
+## Como Executar
 
 A ordem de execução recomendada é:
 
@@ -31,7 +31,7 @@ A ordem de execução recomendada é:
 4.  `dml_insert.sql`
 5.  `queries.sql`
 
-## 👥 Autores
+## Autores
 
 * **João Teixeira** (a88333)
 * **Guilherme Silva** (a88351)
